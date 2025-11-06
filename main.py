@@ -123,35 +123,41 @@ def extract_district(address: str) -> str:
     if not address:
         return "Unknown"
     
-    district_patterns = [
+    # Pattern với tên quận cụ thể (check trước để tránh nhầm lẫn)
+    named_patterns = [
+        (r'Quận\s*Bình\s*Thạnh', 'Quận Bình Thạnh'),
+        (r'Quận\s*Tân\s*Bình', 'Quận Tân Bình'),
+        (r'Quận\s*Tân\s*Phú', 'Quận Tân Phú'),
+        (r'Quận\s*Phú\s*Nhuận', 'Quận Phú Nhuận'),
+        (r'Quận\s*Gò\s*Vấp', 'Quận Gò Vấp'),
+        (r'Quận\s*Bình\s*Tân', 'Quận Bình Tân'),
+        (r'Quận\s*Thủ\s*Đức', 'Quận Thủ Đức'),
+        (r'Thành\s*phố\s*Thủ\s*Đức', 'Thành phố Thủ Đức'),
+        (r'TP\.\s*Thủ\s*Đức', 'Thành phố Thủ Đức'),
+        (r'Huyện\s*Củ\s*Chi', 'Huyện Củ Chi'),
+        (r'Huyện\s*Hóc\s*Môn', 'Huyện Hóc Môn'),
+        (r'Huyện\s*Bình\s*Chánh', 'Huyện Bình Chánh'),
+        (r'Huyện\s*Nhà\s*Bè', 'Huyện Nhà Bè'),
+        (r'Huyện\s*Cần\s*Giờ', 'Huyện Cần Giờ'),
+    ]
+    
+    # Check các quận có tên chữ trước
+    for pattern, district_name in named_patterns:
+        if re.search(pattern, address, re.IGNORECASE):
+            return district_name
+    
+    # Pattern cho các quận có số
+    numbered_patterns = [
         r'Quận\s*(\d+)',
         r'Q\.?\s*(\d+)',
         r'Q(\d+)',
-        r'(Quận\s*Bình\s*Thạnh)',
-        r'(Quận\s*Tân\s*Bình)',
-        r'(Quận\s*Tân\s*Phú)',
-        r'(Quận\s*Phú\s*Nhuận)',
-        r'(Quận\s*Gò\s*Vấp)',
-        r'(Quận\s*Bình\s*Tân)',
-        r'(Quận\s*Thủ\s*Đức)',
-        r'(Thành\s*phố\s*Thủ\s*Đức)',
-        r'(TP\.\s*Thủ\s*Đức)',
-        r'(Huyện\s*Củ\s*Chi)',
-        r'(Huyện\s*Hóc\s*Môn)',
-        r'(Huyện\s*Bình\s*Chánh)',
-        r'(Huyện\s*Nhà\s*Bè)',
-        r'(Huyện\s*Cần\s*Giờ)',
     ]
     
-    address_upper = address
-    
-    for pattern in district_patterns:
-        match = re.search(pattern, address_upper, re.IGNORECASE)
+    for pattern in numbered_patterns:
+        match = re.search(pattern, address, re.IGNORECASE)
         if match:
-            if match.group(1).isdigit():
-                return f"Quận {match.group(1)}"
-            else:
-                return match.group(1)
+            district_number = match.group(1)
+            return f"Quận {district_number}"
     
     return "Unknown"
 
@@ -291,9 +297,9 @@ def main():
                     
                     business = Business()
                    
-                    if len(listing.get_attribute(name_attibute)) >= 1:
-        
-                        business.name = listing.get_attribute(name_attibute)
+                    name_value = listing.get_attribute(name_attibute)
+                    if name_value and len(name_value) >= 1:
+                        business.name = name_value
                     else:
                         business.name = ""
                     if page.locator(address_xpath).count() > 0:

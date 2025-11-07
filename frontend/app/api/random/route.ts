@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
+    if (!process.env.MONGODB_URI) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Database configuration error',
+        },
+        { status: 500 }
+      )
+    }
+
     const searchParams = request.nextUrl.searchParams
     const district = searchParams.get('district')
     const foodType = searchParams.get('food_type')
     const minRating = searchParams.get('min_rating')
     const topRated = searchParams.get('top_rated')
 
+    const clientPromise = (await import('@/lib/mongodb')).default
     const client = await clientPromise
     const db = client.db('food')
     const collection = db.collection('hcm_food_places')

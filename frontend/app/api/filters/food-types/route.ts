@@ -1,15 +1,25 @@
 import { NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET() {
   try {
+    if (!process.env.MONGODB_URI) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Database configuration error',
+        },
+        { status: 500 }
+      )
+    }
+
+    const clientPromise = (await import('@/lib/mongodb')).default
     const client = await clientPromise
     const db = client.db('food')
     const collection = db.collection('hcm_food_places')
 
-    // Get distinct food types
     const foodTypes = await collection.distinct('food_type')
 
     return NextResponse.json({

@@ -205,29 +205,37 @@ def main():
                 try:
                     time.sleep(random.uniform(1, 3))
                     
-                    current_listing = page.locator(
+                    current_listing_link = page.locator(
                         '//a[contains(@href, "https://www.google.com/maps/place")]'
-                    ).nth(listing_index).locator("xpath=..")
+                    ).nth(listing_index)
+                    
+                    current_listing = current_listing_link.locator("xpath=..")
+                    
+                    name_attibute = 'aria-label'
+                    
+                    business = Business()
+                    
+                    try:
+                        current_listing.scroll_into_view_if_needed(timeout=5000)
+                    except:
+                        pass
+                    
+                    name_value = current_listing_link.get_attribute(name_attibute, timeout=5000)
+                    if name_value and len(name_value) >= 1:
+                        business.name = name_value
+                    else:
+                        business.name = ""
                     
                     current_listing.wait_for(state="visible", timeout=10000)
                     current_listing.click(timeout=10000)
                     page.wait_for_timeout(5000)
 
-                    name_attibute = 'aria-label'
                     address_xpath = '//button[@data-item-id="address"]//div[contains(@class, "fontBodyMedium")]'
                     website_xpath = '//a[@data-item-id="authority"]//div[contains(@class, "fontBodyMedium")]'
                     phone_number_xpath = '//button[contains(@data-item-id, "phone:tel:")]//div[contains(@class, "fontBodyMedium")]'
                     review_count_xpath = '//button[@jsaction="pane.reviewChart.moreReviews"]//span'
                     reviews_average_xpath = '//div[@jsaction="pane.reviewChart.moreReviews"]//div[@role="img"]'
                     
-                    
-                    business = Business()
-                   
-                    name_value = current_listing.get_attribute(name_attibute)
-                    if name_value and len(name_value) >= 1:
-                        business.name = name_value
-                    else:
-                        business.name = ""
                     if page.locator(address_xpath).count() > 0:
                         business.address = page.locator(address_xpath).all()[0].inner_text()
                     else:
@@ -269,9 +277,14 @@ def main():
                     business_list.business_list.append(business)
                 except Exception as e:
                     print(f'Error occured on listing {listing_index + 1}/{len(listings)}: {e}')
+                    
+                    if "Timeout" in str(e):
+                        print(f"Skipping listing {listing_index + 1} - element not accessible")
+                    
                     try:
-                        page.go_back(timeout=5000)
-                        page.wait_for_timeout(2000)
+                        if page.url != "https://www.google.com/maps":
+                            page.go_back(timeout=5000)
+                            page.wait_for_timeout(2000)
                     except:
                         pass
                     continue

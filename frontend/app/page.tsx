@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { FoodPlace } from '@/types/foodplace'
+import Navigation from './components/Navigation'
 
 export default function Home() {
   const [foodPlace, setFoodPlace] = useState<FoodPlace | null>(null)
@@ -14,10 +15,62 @@ export default function Home() {
   const [minRating, setMinRating] = useState<number>(0)
   const [topRatedOnly, setTopRatedOnly] = useState<boolean>(false)
   const [isResultVisible, setIsResultVisible] = useState(false)
+  const [history, setHistory] = useState<FoodPlace[]>([])
+  const [favorites, setFavorites] = useState<string[]>([])
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [sidebarTab, setSidebarTab] = useState<'history' | 'favorites'>('history')
 
   useEffect(() => {
     fetchFilters()
+    loadFromLocalStorage()
   }, [])
+
+  useEffect(() => {
+    saveToLocalStorage()
+  }, [history, favorites])
+
+  const loadFromLocalStorage = () => {
+    try {
+      const savedHistory = localStorage.getItem('foodPlaceHistory')
+      const savedFavorites = localStorage.getItem('foodPlaceFavorites')
+      if (savedHistory) setHistory(JSON.parse(savedHistory))
+      if (savedFavorites) setFavorites(JSON.parse(savedFavorites))
+    } catch (error) {
+      console.error('Error loading from localStorage:', error)
+    }
+  }
+
+  const saveToLocalStorage = () => {
+    try {
+      localStorage.setItem('foodPlaceHistory', JSON.stringify(history))
+      localStorage.setItem('foodPlaceFavorites', JSON.stringify(favorites))
+    } catch (error) {
+      console.error('Error saving to localStorage:', error)
+    }
+  }
+
+  const addToHistory = (place: FoodPlace) => {
+    setHistory(prev => {
+      const filtered = prev.filter(p => p._id !== place._id)
+      return [place, ...filtered].slice(0, 20) // Keep last 20
+    })
+  }
+
+  const toggleFavorite = (placeId: string) => {
+    setFavorites(prev => {
+      if (prev.includes(placeId)) {
+        return prev.filter(id => id !== placeId)
+      } else {
+        return [...prev, placeId]
+      }
+    })
+  }
+
+  const clearHistory = () => {
+    if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) {
+      setHistory([])
+    }
+  }
 
   const fetchFilters = async () => {
     try {
@@ -64,6 +117,7 @@ export default function Home() {
       
       if (data.success) {
         setFoodPlace(data.data)
+        addToHistory(data.data)
         setTimeout(() => setIsResultVisible(true), 100)
       } else {
         alert('Không tìm thấy quán ăn phù hợp')
@@ -76,8 +130,201 @@ export default function Home() {
     }
   }
 
+  const loadPlace = (place: FoodPlace) => {
+    setFoodPlace(place)
+    setIsResultVisible(true)
+    setShowSidebar(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const sharePlace = (place: FoodPlace) => {
+    const text = `Quán ${place.name} - ${place.food_type}\n${place.address}\n⭐ ${place.reviews_average.toFixed(1)}/5.0`
+    
+    if (navigator.share) {
+      navigator.share({
+        title: place.name,
+        text: text,
+        url: window.location.href
+      }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(text)
+      alert('Đã copy thông tin quán vào clipboard!')
+    }
+  }
+
+  const favoriteHistory = history.filter(place => favorites.includes(place._id))
+
   return (
-    <main className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <>
+      <Navigation />
+      <main className="min-h-screen pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8">
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="group relative bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:shadow-purple-400/50 transition-all duration-300 hover:scale-110 active:scale-95"
+          title="Lịch sử & Yêu thích"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {history.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+              {history.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 overflow-y-auto ${showSidebar ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-600 text-white p-6 z-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Kho lưu trữ</h2>
+            <button
+              onClick={() => setShowSidebar(false)}
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSidebarTab('history')}
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${sidebarTab === 'history' ? 'bg-white text-purple-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
+            >
+              Lịch sử ({history.length})
+            </button>
+            <button
+              onClick={() => setSidebarTab('favorites')}
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${sidebarTab === 'favorites' ? 'bg-white text-pink-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
+            >
+              Yêu thích ({favorites.length})
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4">
+          {sidebarTab === 'history' && (
+            <>
+              {history.length > 0 && (
+                <button
+                  onClick={clearHistory}
+                  className="w-full mb-4 py-2 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                >
+                  Xóa toàn bộ lịch sử
+                </button>
+              )}
+              {history.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <p>Chưa có lịch sử nào</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {history.map((place) => (
+                    <div
+                      key={place._id}
+                      className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-purple-400 transition-all cursor-pointer hover:shadow-md"
+                      onClick={() => loadPlace(place)}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="font-bold text-gray-900 flex-1">{place.name}</h3>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleFavorite(place._id)
+                          }}
+                          className="flex-shrink-0"
+                        >
+                          <svg className={`w-6 h-6 ${favorites.includes(place._id) ? 'text-red-500 fill-current' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                        <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded-full">{place.food_type}</span>
+                        <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-full">{place.district}</span>
+                      </div>
+                      {place.reviews_average > 0 && (
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                          </svg>
+                          <span className="text-sm font-semibold">{place.reviews_average.toFixed(1)}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {sidebarTab === 'favorites' && (
+            <>
+              {favoriteHistory.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  <p>Chưa có quán yêu thích nào</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {favoriteHistory.map((place) => (
+                    <div
+                      key={place._id}
+                      className="bg-white border-2 border-pink-200 rounded-xl p-4 hover:border-pink-400 transition-all cursor-pointer hover:shadow-md"
+                      onClick={() => loadPlace(place)}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="font-bold text-gray-900 flex-1">{place.name}</h3>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleFavorite(place._id)
+                          }}
+                          className="flex-shrink-0"
+                        >
+                          <svg className="w-6 h-6 text-red-500 fill-current" viewBox="0 0 24 24">
+                            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                        <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded-full">{place.food_type}</span>
+                        <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-full">{place.district}</span>
+                      </div>
+                      {place.reviews_average > 0 && (
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                          </svg>
+                          <span className="text-sm font-semibold">{place.reviews_average.toFixed(1)}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {showSidebar && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8 sm:mb-12 animate-fade-in">
           <div className="inline-block mb-4 sm:mb-6">
@@ -359,15 +606,35 @@ export default function Home() {
         {foodPlace && (
           <div className={`bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-6 sm:p-10 border border-gray-100 transition-all duration-700 ${isResultVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="text-center mb-8 sm:mb-10 pb-6 sm:pb-8 border-b-2 border-slate-100">
-              <div className="mb-3 inline-block">
+              <div className="mb-3 flex items-center justify-center gap-2">
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold rounded-full shadow-sm">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                   </svg>
                   ĐÃ TÌM THẤY
                 </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleFavorite(foodPlace._id)}
+                    className="p-2 rounded-full hover:bg-red-50 transition-colors group"
+                    title={favorites.includes(foodPlace._id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                  >
+                    <svg className={`w-6 h-6 ${favorites.includes(foodPlace._id) ? 'text-red-500 fill-current' : 'text-gray-400 group-hover:text-red-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => sharePlace(foodPlace)}
+                    className="p-2 rounded-full hover:bg-blue-50 transition-colors group"
+                    title="Chia sẻ"
+                  >
+                    <svg className="w-6 h-6 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-5 leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-5 leading-tight">
                 {foodPlace.name}
               </h2>
               <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
@@ -443,25 +710,25 @@ export default function Home() {
                 </div>
               )}
 
-              {foodPlace.phone_number && (
-                <div className="group p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50/30 border-2 border-indigo-200 hover:border-indigo-300 transition-all duration-300 hover:shadow-lg">
-                  <p className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">
-                    <svg className="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                    </svg>
-                    Liên hệ
-                  </p>
-                  <a 
-                    href={`tel:${foodPlace.phone_number}`} 
-                    className="text-lg sm:text-xl text-indigo-600 font-bold hover:text-indigo-700 transition-colors inline-flex items-center gap-2 group"
-                  >
-                    <span>{foodPlace.phone_number}</span>
-                    <svg className="w-5 h-5 transform group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                    </svg>
-                  </a>
+              <div className="group p-6 rounded-2xl bg-gradient-to-br from-rose-50 to-orange-50/30 border-2 border-rose-200 hover:border-rose-300 transition-all duration-300 hover:shadow-lg">
+                <p className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">
+                  <svg className="w-4 h-4 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                  </svg>
+                  Bản đồ
+                </p>
+                <div className="rounded-xl overflow-hidden shadow-lg">
+                  <iframe
+                    key={`map-${foodPlace._id}`}
+                    width="100%"
+                    height="400"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(foodPlace.name + ', ' + foodPlace.address)}&zoom=16`}
+                  />
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -516,5 +783,6 @@ export default function Home() {
         )}
       </div>
     </main>
+    </>
   )
 }

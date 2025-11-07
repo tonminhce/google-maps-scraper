@@ -8,6 +8,8 @@ import re
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
+import random
+import time
 
 @dataclass
 class Business:
@@ -41,14 +43,12 @@ class BusinessList:
             db = client.get_database()
             collection = db[collection_name]
             
-            # Convert business list to dict and add timestamp
             businesses_data = []
             for business in self.business_list:
                 business_dict = asdict(business)
                 business_dict['created_at'] = datetime.now()
                 businesses_data.append(business_dict)
             
-            # Insert into MongoDB
             if businesses_data:
                 result = collection.insert_many(businesses_data)
                 print(f"Successfully inserted {len(result.inserted_ids)} documents to MongoDB")
@@ -129,7 +129,6 @@ def main():
         search_list = []
         input_file_name = 'input.txt'
         input_file_path = os.path.join(os.getcwd(), input_file_name)
-        # Check if the file exists
         if os.path.exists(input_file_path):
             with open(input_file_path, 'r', encoding='utf-8') as file:
                 search_list = file.readlines()
@@ -147,6 +146,10 @@ def main():
         
         for search_for_index, search_for in enumerate(search_list):
             print(f"-----\n{search_for_index} - {search_for}".strip())
+            
+            if search_for_index > 0:
+                print("Waiting between searches...")
+                time.sleep(random.uniform(5, 10))
 
             page.locator('//input[@id="searchboxinput"]').fill(search_for)
             page.wait_for_timeout(3000)
@@ -198,10 +201,16 @@ def main():
 
             business_list = BusinessList()
 
-            # scraping
-            for listing in listings:
+            for listing_index, listing in enumerate(listings):
                 try:
-                    listing.click()
+                    time.sleep(random.uniform(1, 3))
+                    
+                    current_listing = page.locator(
+                        '//a[contains(@href, "https://www.google.com/maps/place")]'
+                    ).nth(listing_index).locator("xpath=..")
+                    
+                    current_listing.wait_for(state="visible", timeout=10000)
+                    current_listing.click(timeout=10000)
                     page.wait_for_timeout(5000)
 
                     name_attibute = 'aria-label'
@@ -214,7 +223,7 @@ def main():
                     
                     business = Business()
                    
-                    name_value = listing.get_attribute(name_attibute)
+                    name_value = current_listing.get_attribute(name_attibute)
                     if name_value and len(name_value) >= 1:
                         business.name = name_value
                     else:
@@ -259,7 +268,13 @@ def main():
 
                     business_list.business_list.append(business)
                 except Exception as e:
-                    print(f'Error occured: {e}')
+                    print(f'Error occured on listing {listing_index + 1}/{len(listings)}: {e}')
+                    try:
+                        page.go_back(timeout=5000)
+                        page.wait_for_timeout(2000)
+                    except:
+                        pass
+                    continue
             
             business_list.save_to_mongodb(collection_name="hcm_food_places")
 

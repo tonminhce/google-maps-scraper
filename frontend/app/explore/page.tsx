@@ -144,7 +144,7 @@ export default function ExplorePage() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 animate-fade-in">
             <h1 className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 mb-4">
-              Khám phá ẩm thực
+              Explore some food
             </h1>
             <p className="text-xl text-gray-600">
               Tìm kiếm và duyệt qua {places.length.toLocaleString()} quán ăn tại Sài Gòn

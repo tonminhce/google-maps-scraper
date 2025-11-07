@@ -77,7 +77,7 @@ export default function StatsPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 mb-4">
-              Thống kê & Phân tích
+              Statistics & Distribution
             </h1>
             <p className="text-xl text-gray-600">
               Khám phá dữ liệu ẩm thực Sài Gòn

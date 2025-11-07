@@ -157,11 +157,11 @@ export default function Home() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen pt-32 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8">
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
         <button
           onClick={() => setShowSidebar(!showSidebar)}
-          className="group relative bg-gradient-to-r from-purple-500 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:shadow-purple-400/50 transition-all duration-300 hover:scale-110 active:scale-95"
+          className="group relative bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-4 rounded-full shadow-2xl hover:shadow-cyan-400/50 transition-all duration-300 hover:scale-110 active:scale-95"
           title="Lịch sử & Yêu thích"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,8 +175,8 @@ export default function Home() {
         </button>
       </div>
 
-      <div className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 overflow-y-auto ${showSidebar ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-600 text-white p-6 z-10">
+      <div className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-[90] transform transition-transform duration-300 overflow-y-auto ${showSidebar ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-6 z-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Kho lưu trữ</h2>
             <button
@@ -191,13 +191,13 @@ export default function Home() {
           <div className="flex gap-2">
             <button
               onClick={() => setSidebarTab('history')}
-              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${sidebarTab === 'history' ? 'bg-white text-purple-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${sidebarTab === 'history' ? 'bg-white text-cyan-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
             >
               Lịch sử ({history.length})
             </button>
             <button
               onClick={() => setSidebarTab('favorites')}
-              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${sidebarTab === 'favorites' ? 'bg-white text-pink-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
+              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all ${sidebarTab === 'favorites' ? 'bg-white text-blue-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
             >
               Yêu thích ({favorites.length})
             </button>
@@ -227,7 +227,7 @@ export default function Home() {
                   {history.map((place) => (
                     <div
                       key={place._id}
-                      className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-purple-400 transition-all cursor-pointer hover:shadow-md"
+                      className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-cyan-400 transition-all cursor-pointer hover:shadow-md"
                       onClick={() => loadPlace(place)}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
@@ -277,7 +277,7 @@ export default function Home() {
                   {favoriteHistory.map((place) => (
                     <div
                       key={place._id}
-                      className="bg-white border-2 border-pink-200 rounded-xl p-4 hover:border-pink-400 transition-all cursor-pointer hover:shadow-md"
+                      className="bg-white border-2 border-blue-200 rounded-xl p-4 hover:border-blue-400 transition-all cursor-pointer hover:shadow-md"
                       onClick={() => loadPlace(place)}
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
@@ -295,11 +295,11 @@ export default function Home() {
                         </button>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-                        <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded-full">{place.food_type}</span>
-                        <span className="px-2 py-1 bg-cyan-100 text-cyan-700 rounded-full">{place.district}</span>
+                        <span className="px-2 py-1 bg-gradient-to-r from-teal-50 to-teal-100 text-teal-700 rounded-full border border-teal-200">{place.food_type}</span>
+                        <span className="px-2 py-1 bg-gradient-to-r from-cyan-50 to-cyan-100 text-cyan-700 rounded-full border border-cyan-200">{place.district}</span>
                       </div>
                       {place.reviews_average > 0 && (
-                        <div className="flex items-center gap-1 text-amber-500">
+                        <div className="flex items-center gap-1 text-amber-600">
                           <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                           </svg>
@@ -317,7 +317,7 @@ export default function Home() {
 
       {showSidebar && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/50 z-[80]"
           onClick={() => setShowSidebar(false)}
         />
       )}
@@ -539,8 +539,8 @@ export default function Home() {
                 }}
                 className={`px-3 py-2.5 rounded-lg font-medium text-xs transition-all transform hover:scale-105 active:scale-95 ${
                   minRating === 3.5 && !topRatedOnly
-                    ? 'bg-teal-500 text-white shadow-sm'
-                    : 'bg-slate-50 text-slate-600 hover:bg-white border border-slate-200 hover:border-teal-300'
+                    ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-600 hover:bg-white border border-slate-200 hover:border-amber-300'
                 }`}
               >
                 3.5+
@@ -553,8 +553,8 @@ export default function Home() {
                 }}
                 className={`px-3 py-2.5 rounded-lg font-medium text-xs transition-all transform hover:scale-105 active:scale-95 ${
                   minRating === 4.5 && !topRatedOnly
-                    ? 'bg-teal-500 text-white shadow-sm'
-                    : 'bg-slate-50 text-slate-600 hover:bg-white border border-slate-200 hover:border-teal-300'
+                    ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-600 hover:bg-white border border-slate-200 hover:border-amber-300'
                 }`}
               >
                 4.5+
@@ -567,8 +567,8 @@ export default function Home() {
                 }}
                 className={`px-3 py-2.5 rounded-lg font-medium text-xs transition-all transform hover:scale-105 active:scale-95 ${
                   minRating === 4.8 && !topRatedOnly
-                    ? 'bg-teal-500 text-white shadow-sm'
-                    : 'bg-slate-50 text-slate-600 hover:bg-white border border-slate-200 hover:border-teal-300'
+                    ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-600 hover:bg-white border border-slate-200 hover:border-amber-300'
                 }`}
               >
                 4.8+
@@ -707,9 +707,9 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="group p-6 rounded-2xl bg-gradient-to-br from-rose-50 to-orange-50/30 border-2 border-rose-200 hover:border-rose-300 transition-all duration-300 hover:shadow-lg">
+              <div className="group p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50/30 border-2 border-blue-200 hover:border-cyan-400 transition-all duration-300 hover:shadow-lg">
                 <p className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">
-                  <svg className="w-4 h-4 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-cyan-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
                   </svg>
                   Bản đồ
@@ -731,7 +731,7 @@ export default function Home() {
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <button
                 onClick={getRandomPlace}
-                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold py-4 px-8 rounded-full hover:shadow-2xl hover:shadow-indigo-300/50 transition-all duration-300 hover:scale-105 active:scale-95"
+                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 px-8 rounded-full hover:shadow-2xl hover:shadow-indigo-300/50 transition-all duration-300 hover:scale-105 active:scale-95"
               >
                 <svg className="w-5 h-5 transform group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -742,7 +742,7 @@ export default function Home() {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${foodPlace.latitude},${foodPlace.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white font-bold py-4 px-8 rounded-full hover:shadow-2xl hover:shadow-teal-300/50 transition-all duration-300 hover:scale-105 active:scale-95"
+                className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-4 px-8 rounded-full hover:shadow-2xl hover:shadow-cyan-300/50 transition-all duration-300 hover:scale-105 active:scale-95"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>

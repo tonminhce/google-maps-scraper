@@ -142,7 +142,6 @@ export default function ExplorePage() {
       <Navigation />
       <main className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="mb-8 animate-fade-in">
             <h1 className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 mb-4">
               Khám phá ẩm thực
@@ -152,9 +151,7 @@ export default function ExplorePage() {
             </p>
           </div>
 
-          {/* Search and Filters */}
           <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-6 mb-8 border border-gray-100">
-            {/* Search Bar */}
             <div className="relative mb-6">
               <input
                 type="text"
@@ -169,7 +166,6 @@ export default function ExplorePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {/* District Filter */}
               <select
                 value={selectedDistrict}
                 onChange={(e) => setSelectedDistrict(e.target.value)}
@@ -183,7 +179,6 @@ export default function ExplorePage() {
                 ))}
               </select>
 
-              {/* Food Type Filter */}
               <select
                 value={selectedFoodType}
                 onChange={(e) => setSelectedFoodType(e.target.value)}
@@ -197,7 +192,6 @@ export default function ExplorePage() {
                 ))}
               </select>
 
-              {/* Rating Filter */}
               <select
                 value={minRating}
                 onChange={(e) => setMinRating(parseFloat(e.target.value))}
@@ -263,9 +257,7 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          {/* Results */}
           <div className="relative">
-            {/* Loading Overlay */}
             {pageLoading && (
               <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 rounded-3xl flex items-center justify-center">
                 <div className="text-center">
@@ -343,7 +335,6 @@ export default function ExplorePage() {
                 ))}
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-12 flex items-center justify-center gap-2">
                   <button

@@ -23,7 +23,7 @@ export async function GET() {
     const places = await collection
       .find({})
       .sort({ reviews_average: -1 })
-      .limit(1000) // Limit for performance
+      .limit(1000)
       .toArray()
 
     return NextResponse.json({

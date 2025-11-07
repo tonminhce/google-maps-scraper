@@ -158,7 +158,6 @@ export default function Home() {
     <>
       <Navigation />
       <main className="min-h-screen pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8">
-      {/* Floating Action Buttons */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
         <button
           onClick={() => setShowSidebar(!showSidebar)}
@@ -176,7 +175,6 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Sidebar */}
       <div className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 overflow-y-auto ${showSidebar ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="sticky top-0 bg-gradient-to-r from-purple-500 to-pink-600 text-white p-6 z-10">
           <div className="flex items-center justify-between mb-4">
@@ -317,7 +315,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Overlay */}
       {showSidebar && (
         <div
           className="fixed inset-0 bg-black/50 z-40"
@@ -725,7 +722,7 @@ export default function Home() {
                     style={{ border: 0 }}
                     loading="lazy"
                     allowFullScreen
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(foodPlace.name + ', ' + foodPlace.address)}&zoom=16`}
+                    src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(foodPlace.name + ', ' + foodPlace.address)}&zoom=16`}
                   />
                 </div>
               </div>

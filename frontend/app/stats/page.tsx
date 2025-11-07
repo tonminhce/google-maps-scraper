@@ -75,7 +75,6 @@ export default function StatsPage() {
       <Navigation />
       <main className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 mb-4">
               Thống kê & Phân tích
@@ -85,7 +84,6 @@ export default function StatsPage() {
             </p>
           </div>
 
-          {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl p-8 text-white shadow-2xl transform hover:scale-105 transition-all">
               <div className="flex items-center justify-between mb-4">
@@ -121,9 +119,7 @@ export default function StatsPage() {
             </div>
           </div>
 
-          {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* By District */}
             <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <svg className="w-6 h-6 text-cyan-600" fill="currentColor" viewBox="0 0 20 20">
@@ -155,7 +151,6 @@ export default function StatsPage() {
               </div>
             </div>
 
-            {/* By Food Type */}
             <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <svg className="w-6 h-6 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
@@ -188,7 +183,6 @@ export default function StatsPage() {
             </div>
           </div>
 
-          {/* Top Rated Section */}
           <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border border-gray-100">
             <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
               <svg className="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 20 20">

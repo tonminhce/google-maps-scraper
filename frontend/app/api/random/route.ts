@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
     const db = client.db('food')
     const collection = db.collection('hcm_food_places')
 
-    // Build query based on filters
     const query: any = {}
     if (district) {
       query.district = district
@@ -38,12 +37,10 @@ export async function GET(request: NextRequest) {
       query.reviews_average = { $gte: parseFloat(minRating) }
     }
 
-    // Get all matching places
     let places
     if (topRated === 'true') {
-      // Get top rated places (sort by rating descending, limit to top 20%)
       const allPlaces = await collection.find(query).sort({ reviews_average: -1 }).toArray()
-      const topCount = Math.max(Math.ceil(allPlaces.length * 0.2), 10) // At least 10 or 20%
+      const topCount = Math.max(Math.ceil(allPlaces.length * 0.2), 10)
       places = allPlaces.slice(0, topCount)
     } else {
       places = await collection.find(query).toArray()
@@ -56,7 +53,6 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Get random place
     const randomIndex = Math.floor(Math.random() * places.length)
     const randomPlace = places[randomIndex]
 

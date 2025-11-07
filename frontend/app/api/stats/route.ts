@@ -20,10 +20,8 @@ export async function GET() {
     const db = client.db('food')
     const collection = db.collection('hcm_food_places')
 
-    // Get total count
     const total = await collection.countDocuments()
 
-    // Get count by district
     const byDistrict = await collection
       .aggregate([
         {
@@ -45,7 +43,6 @@ export async function GET() {
       ])
       .toArray()
 
-    // Get count by food type
     const byFoodType = await collection
       .aggregate([
         {
@@ -67,7 +64,6 @@ export async function GET() {
       ])
       .toArray()
 
-    // Get average rating
     const avgRatingResult = await collection
       .aggregate([
         {
@@ -81,7 +77,6 @@ export async function GET() {
 
     const avgRating = avgRatingResult[0]?.avgRating || 0
 
-    // Get top rated places
     const topRated = await collection
       .find({ reviews_average: { $gt: 0 } })
       .sort({ reviews_average: -1 })

@@ -1,6 +1,3 @@
-"""This script serves as an example on how to use Python 
-   & Playwright to scrape/extract data from Google Maps"""
-
 from playwright.sync_api import sync_playwright
 from dataclasses import dataclass, asdict, field
 import pandas as pd
@@ -14,7 +11,6 @@ from datetime import datetime
 
 @dataclass
 class Business:
-    """holds business data"""
 
     name: str = None
     address: str = None
@@ -30,18 +26,9 @@ class Business:
 
 @dataclass
 class BusinessList:
-    """holds list of Business objects,
-    and save to MongoDB
-    """
     business_list: list[Business] = field(default_factory=list)
     
     def save_to_mongodb(self, collection_name="businesses"):
-        """saves business list to MongoDB
-        
-        Args:
-            collection_name (str): MongoDB collection name
-        """
-        # Load environment variables
         load_dotenv()
         mongodb_uri = os.getenv('MONGODB_URI')
         
@@ -50,9 +37,8 @@ class BusinessList:
             return
         
         try:
-            # Connect to MongoDB
             client = MongoClient(mongodb_uri)
-            db = client.get_database()  # Uses database from connection string
+            db = client.get_database()
             collection = db[collection_name]
             
             # Convert business list to dict and add timestamp
@@ -74,79 +60,38 @@ class BusinessList:
             print(f"Error saving to MongoDB: {e}")
 
     def dataframe(self):
-        """transform business_list to pandas dataframe
-
-        Returns: pandas dataframe
-        """
         return pd.json_normalize(
             (asdict(business) for business in self.business_list), sep="_"
         )
 
-    def save_to_excel(self, filename):
-        """saves pandas dataframe to excel (xlsx) file
-
-        Args:
-            filename (str): filename
-        """
-
-        if not os.path.exists(self.save_at):
-            os.makedirs(self.save_at)
-        self.dataframe().to_excel(f"output/{filename}.xlsx", index=False)
-
-    def save_to_csv(self, filename):
-        """saves pandas dataframe to csv file
-
-        Args:
-            filename (str): filename
-        """
-
-        if not os.path.exists(self.save_at):
-            os.makedirs(self.save_at)
-        self.dataframe().to_csv(f"output/{filename}.csv", index=False)
-
 def extract_coordinates_from_url(url: str) -> tuple[float,float]:
-    """helper function to extract coordinates from url"""
     
     coordinates = url.split('/@')[-1].split('/')[0]
-    # return latitude, longitude
     return float(coordinates.split(',')[0]), float(coordinates.split(',')[1])
 
 def extract_district(address: str) -> str:
-    """helper function to extract district from address
-    
-    Args:
-        address (str): full address string
-        
-    Returns:
-        str: district name or "Unknown"
-    """
     if not address:
         return "Unknown"
     
-    # Pattern với tên quận cụ thể (check trước để tránh nhầm lẫn)
     named_patterns = [
-        (r'Quận\s*Bình\s*Thạnh', 'Quận Bình Thạnh'),
-        (r'Quận\s*Tân\s*Bình', 'Quận Tân Bình'),
-        (r'Quận\s*Tân\s*Phú', 'Quận Tân Phú'),
-        (r'Quận\s*Phú\s*Nhuận', 'Quận Phú Nhuận'),
-        (r'Quận\s*Gò\s*Vấp', 'Quận Gò Vấp'),
-        (r'Quận\s*Bình\s*Tân', 'Quận Bình Tân'),
-        (r'Quận\s*Thủ\s*Đức', 'Quận Thủ Đức'),
-        (r'Thành\s*phố\s*Thủ\s*Đức', 'Thành phố Thủ Đức'),
-        (r'TP\.\s*Thủ\s*Đức', 'Thành phố Thủ Đức'),
-        (r'Huyện\s*Củ\s*Chi', 'Huyện Củ Chi'),
-        (r'Huyện\s*Hóc\s*Môn', 'Huyện Hóc Môn'),
-        (r'Huyện\s*Bình\s*Chánh', 'Huyện Bình Chánh'),
-        (r'Huyện\s*Nhà\s*Bè', 'Huyện Nhà Bè'),
-        (r'Huyện\s*Cần\s*Giờ', 'Huyện Cần Giờ'),
+        (r'Bình\s*Thạnh', 'Bình Thạnh'),
+        (r'Tân\s*Bình', 'Tân Bình'),
+        (r'Tân\s*Phú', 'Tân Phú'),
+        (r'Phú\s*Nhuận', 'Phú Nhuận'),
+        (r'Gò\s*Vấp', 'Gò Vấp'),
+        (r'Bình\s*Tân', 'Bình Tân'),
+        (r'Thủ\s*Đức', 'Thủ Đức'),
+        (r'Huyện\s*Củ\s*Chi', 'Củ Chi'),
+        (r'Huyện\s*Hóc\s*Môn', 'Hóc Môn'),
+        (r'Bình\s*Chánh', 'Bình Chánh'),
+        (r'Nhà\s*Bè', 'Nhà Bè'),
+        (r'Cần\s*Giờ', 'Cần Giờ'),
     ]
     
-    # Check các quận có tên chữ trước
     for pattern, district_name in named_patterns:
         if re.search(pattern, address, re.IGNORECASE):
             return district_name
     
-    # Pattern cho các quận có số
     numbered_patterns = [
         r'Quận\s*(\d+)',
         r'Q\.?\s*(\d+)',
@@ -162,26 +107,11 @@ def extract_district(address: str) -> str:
     return "Unknown"
 
 def extract_food_type(search_query: str) -> str:
-    """helper function to extract food type from search query
-    
-    Args:
-        search_query (str): search query string
-        
-    Returns:
-        str: food type
-    """
-    # Remove "Việt Nam Hồ Chí Minh" from search query
     food_type = search_query.replace("Việt Nam Hồ Chí Minh", "").strip()
     food_type = search_query.replace("Việt Nam", "").replace("Hồ Chí Minh", "").strip()
     return food_type if food_type else "Unknown"
 
 def main():
-    
-    ########
-    # input 
-    ########
-    
-    # read search from arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--search", type=str)
     parser.add_argument("-t", "--total", type=int)
@@ -197,30 +127,22 @@ def main():
 
     if not args.search:
         search_list = []
-        # read search from input.txt file
         input_file_name = 'input.txt'
-        # Get the absolute path of the file in the current working directory
         input_file_path = os.path.join(os.getcwd(), input_file_name)
         # Check if the file exists
         if os.path.exists(input_file_path):
-        # Open the file in read mode
             with open(input_file_path, 'r', encoding='utf-8') as file:
-            # Read all lines into a list
                 search_list = file.readlines()
                 
         if len(search_list) == 0:
             print('Error occured: You must either pass the -s search argument, or add searches to input.txt')
             sys.exit()
         
-    ###########
-    # scraping
-    ###########
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
 
         page.goto("https://www.google.com/maps", timeout=60000)
-        # wait is added for dev phase. can remove it in production
         page.wait_for_timeout(5000)
         
         for search_for_index, search_for in enumerate(search_list):
@@ -232,11 +154,8 @@ def main():
             page.keyboard.press("Enter")
             page.wait_for_timeout(5000)
 
-            # scrolling
             page.hover('//a[contains(@href, "https://www.google.com/maps/place")]')
 
-            # this variable is used to detect if the bot
-            # scraped the same number of listings in the previous iteration
             previously_counted = 0
             while True:
                 page.mouse.wheel(0, 10000)
@@ -255,8 +174,6 @@ def main():
                     print(f"Total Scraped: {len(listings)}")
                     break
                 else:
-                    # logic to break from loop to not run infinitely
-                    # in case arrived at all available listings
                     if (
                         page.locator(
                             '//a[contains(@href, "https://www.google.com/maps/place")]'
@@ -336,20 +253,14 @@ def main():
                     
                     business.latitude, business.longitude = extract_coordinates_from_url(page.url)
                     
-                    # Extract district from address
                     business.district = extract_district(business.address)
                     
-                    # Extract food type from search query
                     business.food_type = extract_food_type(search_for)
 
                     business_list.business_list.append(business)
                 except Exception as e:
                     print(f'Error occured: {e}')
             
-            #########
-            # output
-            #########
-            # Save to MongoDB instead of Excel/CSV
             business_list.save_to_mongodb(collection_name="hcm_food_places")
 
         browser.close()
